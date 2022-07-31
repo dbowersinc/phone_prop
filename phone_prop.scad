@@ -1,69 +1,36 @@
-// phone or pad holder 
+// Library: phone_prop.scad
+// Version: 1.0.0
+// Author: David Bowers
+// Copyright: 2022
+// License: 2-clause BSD License (http://opensource.org/licenses/BSD-2-Clause)
+
+// phone_prop(); 
+//   Made to export a 3D printable stl file from.abs
+
+// EXAMPLE USAGE:
+// PhoneProp();
+//   export stl file and import it into your printer software. 
+
+
+// Comment out these two lines if rendering is to slow.
 $fa = 1.0;
 $fs = 0.4;
 
 // The piece is two cubes held together by
 // three tubes (hollow cynlinders)
 
-module tubes(outside, inside, height){
-    difference(){
-        cylinder(h=height,d=outside,center=true);
-        cylinder(h=height+0.1,d=inside, center=true);
-    }
-}
-// How do you cut away at the right angle?
-// rotate a cube and translate it.
- 
-module cuttingwedge(angle=90, outside=21, height=110){
-    cutters = [outside*2,outside,height+0.5];
-    echo (angle);
-    difference(){
-        cylinder(h=height,d=outside,center=true);
-        rotate([0,0,angle])
-        translate([outside,outside/2,-0.1])
-        cube(cutters,center=true);
-        translate([0,-outside/2,-0.1])
-        cube(cutters,center=true);
-    }
-}
+use <./packages/cup.scad>;
+use <./packages/plate.scad>;
 
-module radius(angle=90, inside=15, thickness=3, height=110) {
-    // a radius is a tube with a portion cut away.
-    outside=inside+thickness*2;
-    intersection(){
-        tubes(outside, inside, height);
-        cuttingwedge(angle, outside, height);
-    }
-}
 
-module blockouts (thickness=3, length=60, width=10, count){
-    size = [length, thickness, width];
-    ctrz = width*(count-1);
-    center = [0,0,-ctrz];
-    translate(center){
-    for ( i = [0:count-1]){
-        loc = [0, 0, i*width*2];
-        translate(loc)
-            cube(size, center=true);
-    }
-}
-}
+// Dimensions:
+inside = 18;      // Thickness of phone
+thickness = 3;    // Thickness of piece 
+length = 120;     // Length of long side
+width = 80; 
 
-module plates (length=100, thickness=3, width=100) {
-    // will produce a plate that is centered on x axis and
-    // aligned with y
-    pllocation = [length/2,0,0];
-    plsize = [length, thickness, width];
-    // blockout sizes
-    bonumber = 4;
-    bowidth = width/(bonumber*2+1);
-    bolength = length - bowidth*2;
-    
-    translate(pllocation)
-            cube(plsize,center=true);
-}
 
-module leanonme(length, thickness, width, obthickness) {
+module phone_prop(length, thickness, width, obthickness) {
     //translate();
     height = length/2;
     // point reference    
@@ -88,24 +55,20 @@ module leanonme(length, thickness, width, obthickness) {
         ];
         
     rotate(rots[0])
-        radius(angles[0],obthickness, thickness, width);
+        cup(angles[0],obthickness, thickness, width);
     translate(points[1])
-        plates(pl1len, thickness, width);
+        plate(pl1len, thickness, width);
     translate(points[2])
         rotate(rots[1])
-            radius(angles[1],obthickness, thickness, width);
+            cup(angles[1],obthickness, thickness, width);
     translate(points[3])
         rotate(rots[0])
-            plates(pl2len, thickness, width);
+            plate(pl2len, thickness, width);
     translate(points[5])
         rotate(rots[2])
-            radius(angles[0],obthickness, thickness, width);
+            cup(angles[0],obthickness, thickness, width);
             
 }
 
-inside = 15;
-thickness = 3;
-length = 120;
-width = 80;
 
-leanonme(length, thickness, width, inside);
+phone_prop(length, thickness, width, inside);
